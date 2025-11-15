@@ -1,0 +1,2657 @@
+{
+	"info": {
+		"_postman_id": "ab55d9a5-0992-46e7-bd77-4f014c0468d7",
+		"name": "AlbLearn API - Complete Learning Management System v5.0.0 -Live",
+		"description": "Complete API collection for AlbLearn - Albanian Language Learning Platform with comprehensive learning management features including modules, sections, quizzes, progress tracking, points system, achievements, analytics, answer submission system, and instructor assignment capabilities. Version 5.0.0 includes verified working endpoints and enhanced admin functionality for instructor management.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "96830"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Register Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.token) {",
+									"        // Set auth_token for general API access",
+									"        pm.environment.set('auth_token', response.data.token);",
+									"        ",
+									"        // Set user_id for reference",
+									"        pm.environment.set('user_id', response.data.user.id);",
+									"        ",
+									"        // New registered users are typically students",
+									"        pm.environment.set('student_token', response.data.token);",
+									"        ",
+									"        console.log('Registration successful - tokens set automatically');",
+									"        pm.test('Registration successful and tokens set', function () {",
+									"            pm.expect(response.success).to.be.true;",
+									"            pm.expect(response.data.token).to.not.be.empty;",
+									"        });",
+									"    }",
+									"} else {",
+									"    pm.test('Registration failed', function () {",
+									"        pm.expect(pm.response.code).to.not.equal(201);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Student\",\n    \"email\": \"student@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.token) {",
+									"        // Set auth_token for general API access",
+									"        pm.environment.set('auth_token', response.data.token);",
+									"        ",
+									"        // Set user_id for reference",
+									"        pm.environment.set('user_id', response.data.user.id);",
+									"        ",
+									"        // Check if user is admin and set admin_token",
+									"        if (response.data.user.roles && response.data.user.roles.some(role => role.name === 'admin')) {",
+									"            pm.environment.set('admin_token', response.data.token);",
+									"             pm.globals.set('alblearntoken', response.data.token);",
+									"            console.log('Admin user detected - admin_token set');",
+									"        }",
+									"        ",
+									"        // Check if user is instructor and set instructor_user_id",
+									"        if (response.data.user.roles && response.data.user.roles.some(role => role.name === 'instructor')) {",
+									"            pm.environment.set('instructor_user_id', response.data.user.id);",
+									"            console.log('Instructor user detected - instructor_user_id set');",
+									"        }",
+									"        ",
+									"        // Check if user is student and set student_token",
+									"        if (response.data.user.roles && response.data.user.roles.some(role => role.name === 'student')) {",
+									"            pm.environment.set('student_token', response.data.token);",
+									"            console.log('Student user detected - student_token set');",
+									"        }",
+									"        ",
+									"        console.log('Login successful - tokens set automatically');",
+									"        pm.test('Login successful and tokens set', function () {",
+									"            pm.expect(response.success).to.be.true;",
+									"            pm.expect(response.data.token).to.not.be.empty;",
+									"        });",
+									"    }",
+									"} else {",
+									"    pm.test('Login failed', function () {",
+									"        pm.expect(pm.response.code).to.not.equal(200);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    // Clear all authentication tokens",
+									"    pm.environment.unset('auth_token');",
+									"    pm.environment.unset('admin_token');",
+									"    pm.environment.unset('student_token');",
+									"    pm.environment.unset('user_id');",
+									"    ",
+									"    console.log('Logout successful - all tokens cleared');",
+									"    pm.test('Logout successful and tokens cleared', function () {",
+									"        pm.expect(pm.response.code).to.equal(200);",
+									"    });",
+									"} else {",
+									"    pm.test('Logout failed', function () {",
+									"        pm.expect(pm.response.code).to.not.equal(200);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/forgot-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"reset_token_here\",\n    \"email\": \"user@example.com\",\n    \"password\": \"new_password\",\n    \"password_confirmation\": \"new_password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👥 User Management",
+			"item": [
+				{
+					"name": "List Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users?per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Luka Cuni\",\n    \"email\": \"lukacuni@gmail.com\",\n    \"password\": \"password123\",\n    \"role\": \"student\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Instructor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.user) {",
+									"        // Set instructor_user_id for instructor assignment",
+									"        pm.environment.set('instructor_user_id', response.data.user.id);",
+									"        ",
+									"        console.log('Instructor created successfully - instructor_user_id set');",
+									"        pm.test('Instructor created successfully', function () {",
+									"            pm.expect(response.success).to.be.true;",
+									"            pm.expect(response.data.user.id).to.not.be.empty;",
+									"        });",
+									"    }",
+									"} else {",
+									"    pm.test('Instructor creation failed', function () {",
+									"        pm.expect(pm.response.code).to.not.equal(201);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{alblearntoken}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "   {\n     \"name\": \"John Doe\",\n     \"email\": \"john@example.com\", \n     \"password\": \"password123\",\n     \"password_confirmation\": \"password123\"\n   }"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/instructors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"instructors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Lako Balili\",\n    \"email\": \"updated@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Roles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{user_id}}/roles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{user_id}}",
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Role to User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role\": \"instructor\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{user_id}}/roles",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{user_id}}",
+								"roles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Role from User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{user_id}}/roles/instructor",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{user_id}}",
+								"roles",
+								"instructor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{user_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📚 Module Management",
+			"item": [
+				{
+					"name": "List All Modules",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules?per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Published Modules",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/published?per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"published"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Modules",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/search?q=albanian&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "albanian"
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Featured Modules",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/featured",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"featured"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find Modules by Tags",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tags\": [\"Shqip\", \"Beginner\"],\n    \"per_page\": 10,\n    \"published_only\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/find-by-tags",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"find-by-tags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Module",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.slug) {",
+									"        pm.environment.set('module_slug', response.data.slug);",
+									"        pm.environment.set('module_id', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Shqipja për Fillestarë - Albanian for Beginners\",\n    \"description\": \"Mësoni gjuhën shqipe nga fillimi. Ky modul përfshin alfabetin, fjalët bazë, gramatikën themelore dhe biseda të thjeshta për komunikim të përditshëm në shqip.\",\n    \"short_description\": \"Zotëroni bazat e shqipes me mësime të strukturuara dhe ushtrime interaktive\",\n    \"level\": \"beginner\",\n    \"price\": 29.99,\n    \"discount_price\": 19.99,\n    \"duration_hours\": 25,\n    \"lessons_count\": 20,\n    \"tags\": [\"Shqip\", \"Albanian\", \"Fillestare\", \"Beginner\", \"Alfabeti\", \"Gramatikë\"],\n    \"requirements\": [\n        \"Asnjë njohuri paraprake e shqipes nuk kërkohet\",\n        \"Dëshira për të mësuar çdo ditë\",\n        \"Qasje në pajisje për dëgjim audiosh\"\n    ],\n    \"learning_outcomes\": [\n        \"Kuptimi i gramatikës bazë të shqipes\",\n        \"Ndërtimi i fjalorit me 500+ fjalë\",\n        \"Zhvillimi i bisedave të thjeshta\",\n        \"Leximi i teksteve bazë shqipe\",\n        \"Shkruarja e fjalive të thjeshta\"\n    ],\n    \"status\": \"published\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Module Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Module",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Albanian Basics - Updated\",\n    \"description\": \"Updated description for Albanian basics\",\n    \"price\": 39.99\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Module",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enroll in Module",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"paid_amount\": 29.99\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/enroll",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"enroll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Module Enrollments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/enrollments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"enrollments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Module Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/statistics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"statistics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Instructor to Module (Admin Only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"description": "Admin JWT token required"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"instructor_id\": \"{{instructor_user_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/assign-instructor",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"assign-instructor"
+							]
+						},
+						"description": "Allows admin users to assign or reassign instructors to modules. The instructor must have 'instructor' or 'admin' role. This action is logged for audit purposes."
+					},
+					"response": [
+						{
+							"name": "Success - Instructor Assigned",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"instructor_id\": \"550e8400-e29b-41d4-a716-446655440000\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/modules/albanian-basics/assign-instructor",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"modules",
+										"albanian-basics",
+										"assign-instructor"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Instructor assigned to module successfully.\",\n    \"data\": {\n        \"id\": \"550e8400-e29b-41d4-a716-446655440001\",\n        \"title\": \"Albanian Basics\",\n        \"slug\": \"albanian-basics\",\n        \"description\": \"Learn the fundamentals of Albanian language\",\n        \"instructor_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n        \"instructor\": {\n            \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n            \"name\": \"John Instructor\",\n            \"email\": \"instructor@alblearn.com\"\n        },\n        \"status\": \"published\",\n        \"level\": \"beginner\",\n        \"price\": \"29.99\",\n        \"created_at\": \"2025-09-21T10:00:00.000000Z\",\n        \"updated_at\": \"2025-09-21T15:30:00.000000Z\"\n    }\n}"
+						},
+						{
+							"name": "Error - Unauthorized (Non-Admin)",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{student_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"instructor_id\": \"550e8400-e29b-41d4-a716-446655440000\"\n}"
+								},
+								"url": {
+									"raw": ""
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"This action is unauthorized.\"\n}"
+						},
+						{
+							"name": "Error - Invalid Instructor",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"instructor_id\": \"invalid-user-id\"\n}"
+								},
+								"url": {
+									"raw": ""
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": false,\n    \"message\": \"The given data was invalid.\",\n    \"errors\": {\n        \"instructor_id\": [\n            \"The selected instructor does not exist or does not have instructor/admin role.\"\n        ]\n    }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "📖 Section Management",
+			"item": [
+				{
+					"name": "List Module Sections",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/sections?published_only=true&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"sections"
+							],
+							"query": [
+								{
+									"key": "published_only",
+									"value": "true"
+								},
+								{
+									"key": "per_page",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Section",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.id) {",
+									"        pm.environment.set('section_id', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Introduction to Albanian Alphabet\",\n    \"content\": \"<h2>Albanian Alphabet</h2><p>The Albanian alphabet consists of 36 letters...</p>\",\n    \"description\": \"Learn the Albanian alphabet and basic pronunciation\",\n    \"order_number\": 1,\n    \"points\": 10,\n    \"is_published\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/sections",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"sections"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Section Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/sections/{{section_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"sections",
+								"{{section_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Section",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Introduction to Albanian Alphabet - Updated\",\n    \"content\": \"<h2>Albanian Alphabet - Updated</h2><p>The Albanian alphabet consists of 36 letters and is based on the Latin script...</p>\",\n    \"points\": 15\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/sections/{{section_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"sections",
+								"{{section_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Section",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/sections/{{section_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"sections",
+								"{{section_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "❓ Quiz Management",
+			"item": [
+				{
+					"name": "List All Quizzes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes?per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Section Quizzes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/sections/{{section_id}}/quizzes?published_only=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"sections",
+								"{{section_id}}",
+								"quizzes"
+							],
+							"query": [
+								{
+									"key": "published_only",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Section Quizzes (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/sections/{{section_id}}/quizzes/paginated?per_page=10&published_only=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"sections",
+								"{{section_id}}",
+								"quizzes",
+								"paginated"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "10"
+								},
+								{
+									"key": "published_only",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Multiple Choice Quiz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.id) {",
+									"        pm.environment.set('quiz_id', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"Si thuhet 'mirëdita' në shqip? / How do you say 'good day' in Albanian?\",\n    \"type\": \"closed\",\n    \"options\": [\n        \"Tungjatjeta\",\n        \"Mirëdita\", \n        \"Faleminderit\",\n        \"Mirupafshim\"\n    ],\n    \"correct_answer\": \"Mirëdita\",\n    \"explanation\": \"'Mirëdita' është mënyra standarde për të thënë 'good day' në shqip. 'Tungjatjeta' është përshëndetje më e përgjithshme, 'Faleminderit' do të thotë 'thank you', dhe 'Mirupafshim' do të thotë 'goodbye'.\",\n    \"points\": 5,\n    \"order_number\": 1,\n    \"section_id\": {{section_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Open-Ended Quiz",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"Explain the difference between 'Tungjatjeta' and 'Mirëdita' in Albanian greetings.\",\n    \"type\": \"open\",\n    \"options\": null,\n    \"correct_answer\": \"Tungjatjeta is a more general greeting used at any time, while Mirëdita specifically means good day and is used during daytime.\",\n    \"explanation\": \"Both are common Albanian greetings, but they have different usage contexts and formality levels.\",\n    \"points\": 10,\n    \"order_number\": 2,\n    \"section_id\": {{section_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Quiz Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Quiz",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"Si thuhet 'mirëdita' në shqip? / How do you say 'good day' in Albanian? (Updated)\",\n    \"points\": 8,\n    \"explanation\": \"Updated explanation: 'Mirëdita' është mënyra standarde për të thënë 'good day' në shqip.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Quiz",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Section Quizzes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/sections/{{section_id}}/quizzes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"sections",
+								"{{section_id}}",
+								"quizzes"
+							]
+						},
+						"description": "Get all quizzes for a specific section.\n\n**Access Policy:**\n- ✅ Requires authentication (Bearer token)\n- ✅ Requires module to be published\n- ❌ Does NOT require module enrollment\n- ❌ Does NOT require section unlock\n- ❌ Does NOT require prerequisite completion\n\n**Query Parameters:**\n- `published_only` (optional): Filter to only active quizzes (default: true)\n\n**Note:** Quizzes are accessible to all authenticated users in published modules, regardless of enrollment or unlock status."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Quiz",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('quiz_id', response.data.id);",
+									"    console.log('✅ Quiz created:', response.data.id);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{alblearntoken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"section_id\": {{section_id}},\n    \"type\": \"closed\",\n    \"question\": \"How many letters are in the Albanian alphabet?\",\n    \"options\": [\"26\", \"28\", \"32\", \"38\"],\n    \"correct_answer\": \"3\",\n    \"explanation\": \"The Albanian alphabet has 38 letters.\",\n    \"points\": 5,\n    \"order_number\": 1,\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🎯 Quiz Answer Submission",
+			"item": [
+				{
+					"name": "Submit Multiple Choice Answer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_answer\": \"Mirëdita\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}/submit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}",
+								"submit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Open-Ended Answer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_answer\": \"Tungjatjeta is a more general greeting used at any time, while Mirëdita specifically means good day and is used during daytime.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/2/submit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"2",
+								"submit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Quiz Attempts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/quizzes/{{quiz_id}}/attempts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"quizzes",
+								"{{quiz_id}}",
+								"attempts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Section Quiz Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/sections/{{section_id}}/quiz-stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"sections",
+								"{{section_id}}",
+								"quiz-stats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Section Quiz Progress",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/sections/{{section_id}}/quiz-progress",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"sections",
+								"{{section_id}}",
+								"quiz-progress"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Section Quiz Stats Copy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/sections/{{section_id}}/quiz-stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"sections",
+								"{{section_id}}",
+								"quiz-stats"
+							]
+						},
+						"description": "Get quiz statistics for a section (total quizzes, completed, score, etc.).\n\n**Access Policy:**\n- ✅ Requires authentication (Bearer token)\n- ✅ Requires module to be published\n- ❌ Does NOT require module enrollment\n- ❌ Does NOT require section unlock\n\n**Response Includes:**\n- Total quizzes in section\n- Completed quizzes count\n- Correct answers count\n- Total points available\n- Points earned\n- Score percentage\n- Completion status"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📁 File Management",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "type",
+									"value": "document",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Avatar",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/upload-avatar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"upload-avatar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Multiple Files",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "type",
+									"value": "document",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/upload-multiple",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"upload-multiple"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get File Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/info?path=uploads/documents/file.pdf",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"info"
+							],
+							"query": [
+								{
+									"key": "path",
+									"value": "uploads/documents/file.pdf"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get File Upload Configuration",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/files/config",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"path\": \"uploads/documents/file.pdf\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/files",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📊 Activity Logs",
+			"item": [
+				{
+					"name": "List All Activities",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/activities?per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"activities"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Activities",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/activities/my?per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"activities",
+								"my"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Activities",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/activities/user/{{user_id}}?per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"activities",
+								"user",
+								"{{user_id}}"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Activity Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/activities/statistics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"activities",
+								"statistics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cleanup Old Activities",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"days\": 30\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/activities/cleanup",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"activities",
+								"cleanup"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🏆 Points & Achievements",
+			"item": [
+				{
+					"name": "Get Points Summary",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/points/summary",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"points",
+								"summary"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Achievements",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/achievements?per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"achievements"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unlocked Achievements",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/achievements/unlocked",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"achievements",
+								"unlocked"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📈 Progress & Analytics",
+			"item": [
+				{
+					"name": "Get Module Progress",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/{{module_slug}}/progress",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"{{module_slug}}",
+								"progress"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Progress Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/progress/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"progress",
+								"stats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leaderboard",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/progress/leaderboard?limit=50&period=month",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"progress",
+								"leaderboard"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								},
+								{
+									"key": "period",
+									"value": "month"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔗 Prerequisites & Learning Path",
+			"item": [
+				{
+					"name": "Get Learning Path",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/learning-path",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"learning-path"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Accessible Modules",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/accessible?per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"accessible"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Locked Modules",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/modules/locked?per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"modules",
+								"locked"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "20"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔧 System",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000"
+		},
+		{
+			"key": "auth_token",
+			"value": ""
+		},
+		{
+			"key": "user_id",
+			"value": ""
+		},
+		{
+			"key": "module_slug",
+			"value": ""
+		},
+		{
+			"key": "module_id",
+			"value": ""
+		},
+		{
+			"key": "section_id",
+			"value": ""
+		},
+		{
+			"key": "quiz_id",
+			"value": ""
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"description": "JWT token for admin user - required for instructor assignment"
+		},
+		{
+			"key": "instructor_user_id",
+			"value": "",
+			"description": "UUID of the instructor user to be assigned to module"
+		},
+		{
+			"key": "student_token",
+			"value": "",
+			"description": "JWT token for student user - for testing unauthorized access"
+		}
+	]
+}

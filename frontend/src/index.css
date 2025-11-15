@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+@layer base {
+  * {
+    @apply scroll-smooth;
+  }
+
+  html {
+    font-family: "Inter", system-ui, sans-serif;
+  }
+
+  body {
+    @apply antialiased bg-gradient-to-br from-secondary-50 via-white to-primary-50/30;
+  }
+}
+
+@layer utilities {
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@layer components {
+  .btn-base {
+    @apply inline-flex items-center justify-center gap-2 px-6 h-12 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-4 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-compact {
+    @apply inline-flex items-center justify-center gap-2 px-4 h-10 rounded-xl font-medium text-sm transition-all duration-300 focus:outline-none focus:ring-4 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-icon {
+    @apply inline-flex items-center justify-center rounded-xl w-10 h-10 transition-all duration-300 focus:outline-none focus:ring-4 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn-base relative bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 focus:ring-primary-300/50;
+  }
+
+  .btn-primary::before {
+    @apply content-[''] absolute inset-0 bg-gradient-to-r from-white/20 to-white/10 rounded-xl opacity-0 transition-opacity duration-300;
+  }
+
+  .btn-primary:hover::before {
+    @apply opacity-100;
+  }
+
+  .btn-secondary {
+    @apply btn-base bg-white hover:bg-secondary-50 text-secondary-700 border border-secondary-200 hover:border-secondary-300 shadow-soft hover:shadow-medium transform hover:scale-105 active:scale-95 focus:ring-secondary-300/50;
+  }
+
+  .btn-danger {
+    @apply btn-base bg-gradient-to-r from-error-500 to-error-600 hover:from-error-600 hover:to-error-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 focus:ring-error-300/50;
+  }
+
+  .btn-success {
+    @apply btn-base bg-gradient-to-r from-success-500 to-success-600 hover:from-success-600 hover:to-success-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 focus:ring-success-300/50;
+  }
+
+  .btn-ghost {
+    @apply btn-base bg-white/5 text-white/85 border border-white/15 hover:bg-white/10 hover:text-white shadow-soft hover:shadow-medium;
+  }
+
+  .btn-compact-primary {
+    @apply btn-compact bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white shadow-soft hover:shadow-medium focus:ring-primary-300/40;
+  }
+
+  .btn-compact-secondary {
+    @apply btn-compact bg-white text-secondary-700 border border-secondary-200 hover:border-secondary-300 shadow-soft hover:shadow-medium focus:ring-secondary-300/40;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-secondary-200 bg-white/80 backdrop-blur-sm rounded-xl focus:outline-none focus:ring-4 focus:ring-primary-300/50 focus:border-primary-400 transition-all duration-300 placeholder-secondary-400;
+  }
+
+  .input-field:focus {
+    @apply shadow-glow;
+  }
+
+  .card {
+    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-soft hover:shadow-medium transition-all duration-300 p-6 border border-white/50 transform hover:-translate-y-1;
+  }
+
+  .card-interactive {
+    @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-soft hover:shadow-large transition-all duration-500 p-6 border border-white/50 hover:border-primary-200/50 cursor-pointer transform hover:scale-105 hover:-translate-y-1;
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800;
+  }
+
+  .glass-effect {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl;
+  }
+
+  .stat-card {
+    @apply bg-gradient-to-br from-white to-secondary-50/50 rounded-2xl p-6 shadow-soft hover:shadow-medium transition-all duration-500 border border-white/50 hover:border-primary-200/30;
+  }
+
+  .nav-link {
+    @apply inline-flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-xl text-sm font-medium text-white/80 transition-all duration-200 hover:text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 backdrop-blur-sm h-10;
+  }
+
+  .nav-link-active {
+    @apply text-white bg-white/20 shadow-glow;
+  }
+
+  .avatar-md {
+    @apply w-10 h-10 rounded-full inline-flex items-center justify-center font-semibold;
+  }
+
+  .avatar-sm {
+    @apply w-7 h-7 rounded-full inline-flex items-center justify-center font-semibold;
+  }
+
+  .progress-bar {
+    @apply h-3 bg-secondary-200 rounded-full overflow-hidden shadow-inner;
+  }
+
+  .progress-fill {
+    @apply h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-700 ease-out shadow-sm;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ring-1 ring-inset;
+  }
+
+  .badge-success {
+    @apply badge bg-success-50 text-success-700 ring-success-200;
+  }
+
+  .badge-warning {
+    @apply badge bg-warning-50 text-warning-700 ring-warning-200;
+  }
+
+  .badge-info {
+    @apply badge bg-primary-50 text-primary-700 ring-primary-200;
+  }
+
+  .badge-error {
+    @apply badge bg-error-50 text-error-700 ring-error-200;
+  }
+
+  .status-badge {
+    @apply shadow-soft hover:shadow-medium transition-all duration-300 backdrop-blur-sm;
+  }
+
+  .status-badge .badge-icon {
+    @apply inline-flex items-center;
+  }
+
+  .floating-element {
+    @apply animate-float;
+  }
+
+  .glow-element {
+    @apply animate-glow;
+  }
+
+  .navbar-glow {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 4px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  .dropdown-menu {
+    z-index: 99999 !important;
+    position: absolute !important;
+  }
+}
